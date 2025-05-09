@@ -1,11 +1,12 @@
 // src/App.tsx
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import JobForm from './components/JobForm';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import JobList from './components/JobList';
+import JobForm from './components/JobForm';
 import About from './components/About';
 import Contact from './components/Contact';
 import Privacy from './components/Privacy';
+import Navbar from './components/Navbar';
 
 export interface Job {
   id?: number;
@@ -21,62 +22,59 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetch('/api/JobApplications')
-      .then((res) => res.json())
-      .then((data) => setJobs(data));
+      .then(res => res.json())
+      .then(setJobs)
+      .catch(err => console.error('Failed to load jobs', err));
   }, []);
 
-  const addJob = (job: Omit<Job, 'id'>) => {
-    fetch('/api/JobApplications', {
+  const addJob = async (job: Job) => {
+    const response = await fetch('/api/JobApplications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(job),
-    })
-      .then((res) => res.json())
-      .then((newJob) => setJobs([...jobs, newJob]));
+      body: JSON.stringify(job)
+    });
+    const newJob = await response.json();
+    setJobs([...jobs, newJob]);
   };
 
-  const updateJob = (updatedJob: Job) => {
-    fetch(`/api/JobApplications/${updatedJob.id}`, {
+  const updateJob = async (updatedJob: Job) => {
+    await fetch(`/api/JobApplications/${updatedJob.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedJob),
-    }).then(() => {
-      setJobs(jobs.map((job) => (job.id === updatedJob.id ? updatedJob : job)));
+      body: JSON.stringify(updatedJob)
     });
+    setJobs(jobs.map(j => j.id === updatedJob.id ? updatedJob : j));
   };
 
-  const deleteJob = (id: number) => {
-    fetch(`/api/JobApplications/${id}`, { method: 'DELETE' }).then(() => {
-      setJobs(jobs.filter((job) => job.id !== id));
-    });
+  const deleteJob = async (id: number) => {
+    await fetch(`/api/JobApplications/${id}`, { method: 'DELETE' });
+    setJobs(jobs.filter(j => j.id !== id));
   };
 
   return (
     <Router>
-      <nav style={{ marginBottom: '20px' }}>
-        <Link to="/" style={{ marginRight: '10px' }}>Job List</Link>
-        <Link to="/aboutme" style={{ marginRight: '10px' }}>About</Link>
-        <Link to="/contact" style={{ marginRight: '10px' }}>Contact</Link>
-        <Link to="/privacy" style={{ marginRight: '10px' }}>Privacy</Link>
-        <Link to="/email">Email Us</Link>
-      </nav>
-
+      <Navbar />
       <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <JobForm onJobAdded={addJob} />
-              <JobList jobs={jobs} onJobUpdated={updateJob} onJobDeleted={deleteJob} />
-            </>
-          }
-        />
+        <Route path="/" element={<Navigate to="/jobs" />} />
+        <Route path="/jobs" element={
+          <>
+            <JobForm onJobAdded={addJob} />
+            <JobList jobs={jobs} onJobUpdated={updateJob} onJobDeleted={deleteJob} />
+          </>
+        } />
         <Route path="/aboutme" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/email" element={<RedirectToMVCEmail />} />
       </Routes>
     </Router>
   );
+};
+
+// 👇 Add this helper component to redirect to the MVC Razor form
+const RedirectToMVCEmail: React.FC = () => {
+  window.location.href = 'https://localhost:5195/MVC/Email';
+  return null;
 };
 
 export default App;

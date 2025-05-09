@@ -28,6 +28,18 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/JustinT/project/JobTracker.API/View/EmailForm.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld1xFbWFpbEZvcm0uY3NodG1s
+[C:/Users/JustinT/project/JobTracker.API/View/MVC/Email.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld1xNVkNcRW1haWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/JustinT/project/JobTracker.API/View/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld1xTaGFyZWRcX0xheW91dC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/JustinT/project/JobTracker.API/View/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld1xTaGFyZWRcX1ZhbGlkYXRpb25TY3JpcHRzUGFydGlhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/JustinT/project/JobTracker.API/View/Shared/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld1xTaGFyZWRcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 

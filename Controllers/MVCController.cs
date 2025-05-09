@@ -1,57 +1,58 @@
-using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Mvc;
+using JobTracker.API.Models;
 
 namespace JobTracker.API.Controllers
 {
     public class MVCController : Controller
     {
-        // GET: Display the email submission form
-        [HttpGet]
-        public IActionResult EmailForm()
+        // Display the email form
+        public IActionResult Email()
         {
             return View();
         }
 
-        // POST: Handle the email form submission
+        // Handle the form submission and send the email
         [HttpPost]
-        public IActionResult SubmitEmail(string name, string email, string message)
+        public IActionResult SendEmail(EmailModel emailModel)
         {
+            if (!ModelState.IsValid)
+            {
+                return View("Email", emailModel); // Redisplay the form if validation fails
+            }
+
+            // Set up email client
             try
             {
-                // Create the email message
-                var mailMessage = new MailMessage
+                var smtpClient = new SmtpClient("smtp.gmail.com")
                 {
-                    From = new MailAddress(email), // User's email
-                    Subject = "New Message from Contact Form",
-                    Body = $"Name: {name}\nEmail: {email}\nMessage: {message}",
-                    IsBodyHtml = false
+                    Port = 587,
+                    Credentials = new NetworkCredential("jtran1412@gmail.com", "Purple989#"),
+                    EnableSsl = true,
                 };
 
-                // Send the email to your Gmail address
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("yourEmail@gmail.com"),
+                    Subject = "Message from " + emailModel.Name,
+                    Body = $"From: {emailModel.Name} ({emailModel.Email})\n\nMessage:\n{emailModel.Message}",
+                    IsBodyHtml = false,
+                };
+
+                // Send email to your email address
                 mailMessage.To.Add("jtran1412@gmail.com");
 
-                // Send the email using Gmail's SMTP server
-                using (var smtpClient = new SmtpClient("smtp.gmail.com"))
-                {
-                    smtpClient.Port = 587;
-                    smtpClient.Credentials = new NetworkCredential("your-email@gmail.com", "your-email-password"); // Your Gmail credentials
-                    smtpClient.EnableSsl = true;
+                smtpClient.Send(mailMessage);
 
-                    smtpClient.Send(mailMessage);
-                }
-
-                // Return a success message or redirect to a success page
                 ViewBag.Message = "Your message has been sent successfully!";
-                return View("EmailForm"); // Show success message on the same page
             }
-            catch (Exception ex)
+            catch
             {
-                // Handle error, maybe log it
-                ViewBag.Message = "An error occurred while sending the email: " + ex.Message;
-                return View("EmailForm"); // Show error message on the same page
+                ViewBag.Message = "There was an error sending your message. Please try again later.";
             }
+
+            return View("Email", emailModel); // Return the view with feedback
         }
     }
 }
-
