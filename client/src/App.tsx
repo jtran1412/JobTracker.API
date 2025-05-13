@@ -1,12 +1,6 @@
 // src/App.tsx
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import JobList from './components/JobList';
-import JobForm from './components/JobForm';
-import About from './components/About';
-import Contact from './components/Contact';
-import Privacy from './components/Privacy';
-import Navbar from './components/Navbar';
 
 export interface Job {
   id?: number;
@@ -20,6 +14,14 @@ export interface Job {
 const App: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
 
+  const [form, setForm] = useState<Job>({
+    companyName: '',
+    jobTitle: '',
+    status: '',
+    appliedDate: '',
+    notes: ''
+  });
+
   useEffect(() => {
     fetch('/api/JobApplications')
       .then(res => res.json())
@@ -27,14 +29,31 @@ const App: React.FC = () => {
       .catch(err => console.error('Failed to load jobs', err));
   }, []);
 
-  const addJob = async (job: Job) => {
-    const response = await fetch('/api/JobApplications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(job)
-    });
-    const newJob = await response.json();
-    setJobs([...jobs, newJob]);
+  const addJob = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/JobApplications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+
+      if (!res.ok) {
+        console.error('Failed to add job');
+        return;
+      }
+
+      const newJob = await res.json();
+      setJobs(prev => [...prev, newJob]);
+      setForm({ companyName: '', jobTitle: '', status: '', appliedDate: '', notes: '' });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteJob = async (id: number) => {
+    await fetch(`/api/JobApplications/${id}`, { method: 'DELETE' });
+    setJobs(jobs.filter(j => j.id !== id));
   };
 
   const updateJob = async (updatedJob: Job) => {
@@ -46,35 +65,59 @@ const App: React.FC = () => {
     setJobs(jobs.map(j => j.id === updatedJob.id ? updatedJob : j));
   };
 
-  const deleteJob = async (id: number) => {
-    await fetch(`/api/JobApplications/${id}`, { method: 'DELETE' });
-    setJobs(jobs.filter(j => j.id !== id));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const RedirectToMVCEmail: React.FC = () => {
+    window.location.href = 'https://localhost:5195/MVC/Email';
+    return null;
   };
 
   return (
     <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Navigate to="/jobs" />} />
-        <Route path="/jobs" element={
-          <>
-            <JobForm onJobAdded={addJob} />
-            <JobList jobs={jobs} onJobUpdated={updateJob} onJobDeleted={deleteJob} />
-          </>
-        } />
-        <Route path="/aboutme" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/email" element={<RedirectToMVCEmail />} />
-      </Routes>
+      <div style={{ padding: '1rem' }}>
+        <h1>Job Tracker</h1>
+        <Routes>
+          <Route path="/" element={<Navigate to="/jobs" />} />
+          <Route path="/jobs" element={
+            <>
+              <form onSubmit={addJob} style={{ marginBottom: '2rem' }}>
+                <h2>Add Job</h2>
+                <input name="companyName" value={form.companyName} onChange={handleChange} placeholder="Company Name" required />
+                <input name="jobTitle" value={form.jobTitle} onChange={handleChange} placeholder="Job Title" required />
+                <input name="status" value={form.status} onChange={handleChange} placeholder="Status" required />
+                <input name="appliedDate" type="date" value={form.appliedDate} onChange={handleChange} required />
+                <textarea name="notes" value={form.notes} onChange={handleChange} placeholder="Notes" />
+                <button type="submit">Add Job</button>
+              </form>
+
+              <h2>Job List</h2>
+              {jobs.length === 0 ? (
+                <p>No jobs yet.</p>
+              ) : (
+                <ul>
+                  {jobs.map(job => (
+                    <li key={job.id}>
+                      <strong>{job.jobTitle}</strong> at {job.companyName} – {job.status}
+                      <br />
+                      <small>Applied on {job.appliedDate}</small>
+                      {job.notes && <p>{job.notes}</p>}
+                      <button onClick={() => deleteJob(job.id!)}>Delete</button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          } />
+          <Route path="/email" element={<RedirectToMVCEmail />} />
+          <Route path="/aboutme" element={<p>About Me Page</p>} />
+          <Route path="/contact" element={<p>Contact Page</p>} />
+          <Route path="/privacy" element={<p>Privacy Page</p>} />
+        </Routes>
+      </div>
     </Router>
   );
-};
-
-// 👇 Add this helper component to redirect to the MVC Razor form
-const RedirectToMVCEmail: React.FC = () => {
-  window.location.href = 'https://localhost:5195/MVC/Email';
-  return null;
 };
 
 export default App;
