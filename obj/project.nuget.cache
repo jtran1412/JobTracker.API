@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "jazia5YPgQE=",
+  "dgSpecHash": "QPHeiOzi5lY=",
   "success": true,
   "projectFilePath": "C:\\Users\\JustinT\\project\\v2\\JobTracker.API.csproj",
   "expectedPackageFiles": [
@@ -91,5 +91,16 @@
     "C:\\Users\\JustinT\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512",
     "C:\\Users\\JustinT\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "JobTracker.API depends on Swashbuckle.AspNetCore (>= 6.13.2) but Swashbuckle.AspNetCore 6.13.2 was not found. Swashbuckle.AspNetCore 7.0.0 was resolved instead.",
+      "libraryId": "Swashbuckle.AspNetCore",
+      "targetGraphs": [
+        "net9.0"
+      ]
+    }
+  ]
 }

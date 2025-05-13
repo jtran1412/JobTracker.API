@@ -5165,7 +5165,7 @@
       "Microsoft.EntityFrameworkCore.Design >= 9.0.4",
       "Microsoft.EntityFrameworkCore.SqlServer >= 9.0.4",
       "Microsoft.EntityFrameworkCore.Tools >= 9.0.4",
-      "Swashbuckle.AspNetCore >= 7.0.0"
+      "Swashbuckle.AspNetCore >= 6.13.2"
     ]
   },
   "packageFolders": {
@@ -5240,7 +5240,7 @@
           },
           "Swashbuckle.AspNetCore": {
             "target": "Package",
-            "version": "[7.0.0, )"
+            "version": "[6.13.2, )"
           }
         },
         "imports": [
@@ -5265,5 +5265,17 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "JobTracker.API depends on Swashbuckle.AspNetCore (>= 6.13.2) but Swashbuckle.AspNetCore 6.13.2 was not found. Swashbuckle.AspNetCore 7.0.0 was resolved instead.",
+      "libraryId": "Swashbuckle.AspNetCore",
+      "targetGraphs": [
+        "net9.0"
+      ]
+    }
+  ]
 }
