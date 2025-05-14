@@ -1,35 +1,46 @@
-// src/components/JobList.tsx
-import React from 'react';
-import { Job } from '../App'; // Adjust if your Job interface is declared elsewhere
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-interface JobListProps {
-  jobs: Job[];
-  onJobUpdated: (updatedJob: Job) => void;
-  onJobDeleted: (jobId: number) => void;
-}
+const JobList = () => {
+  const [jobs, setJobs] = useState<any[]>([]);  // State to store jobs
+  const [loading, setLoading] = useState<boolean>(true);  // Loading state
+  const [error, setError] = useState<string>('');  // Error state
 
-const JobList: React.FC<JobListProps> = ({ jobs, onJobUpdated, onJobDeleted }) => {
-  const handleUpdate = (job: Job) => {
-    const updatedJob = { ...job, status: 'Updated Status' }; // Example change
-    onJobUpdated(updatedJob);
-  };
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await axios.get('/api/JobApplications');  // Fetch data from API
+        setJobs(response.data);  // Set jobs to state
+      } catch (error: any) {
+        setError('Failed to load jobs. Please try again later.');
+        console.error('Error fetching jobs:', error);  // Log errors for debugging
+      } finally {
+        setLoading(false);  // Set loading to false once data is fetched
+      }
+    };
 
-  const handleDelete = (jobId: number) => {
-    onJobDeleted(jobId);
-  };
+    fetchJobs();
+  }, []);  // Runs once when the component mounts
+
+  if (loading) {
+    return <div>Loading...</div>;  // Show loading message
+  }
+
+  if (error) {
+    return <div>{error}</div>;  // Show error message if any
+  }
+
+  if (jobs.length === 0) {
+    return <div>No jobs available</div>;  // Show message if no jobs are available
+  }
 
   return (
     <div>
-      <h2>Job List</h2>
+      <h1>Job List</h1>
       <ul>
-        {jobs.map((job) => (
+        {jobs.map((job: any) => (
           <li key={job.id}>
-            <strong>{job.companyName}</strong> - {job.jobTitle} - {job.status} - {job.appliedDate}
-            {job.notes && <p>Notes: {job.notes}</p>}
-            <div>
-              <button onClick={() => handleUpdate(job)}>Update</button>
-              <button onClick={() => handleDelete(job.id!)}>Delete</button>
-            </div>
+            {job.jobTitle} at {job.companyName} - {job.status}
           </li>
         ))}
       </ul>

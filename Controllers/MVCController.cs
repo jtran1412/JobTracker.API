@@ -1,58 +1,41 @@
-using System.Net;
-using System.Net.Mail;
-using Microsoft.AspNetCore.Mvc;
 using JobTracker.API.Models;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 
 namespace JobTracker.API.Controllers
 {
     public class MVCController : Controller
     {
-        // Display the email form
-        public IActionResult Email()
+        private static List<ContactMessage> _messages = new List<ContactMessage>();
+
+        // Display the contact form
+        public IActionResult Contact()
         {
             return View();
         }
 
-        // Handle the form submission and send the email
+        // Handle the form submission and log the contact message
         [HttpPost]
-        public IActionResult SendEmail(EmailModel emailModel)
+        public IActionResult SubmitMessage(ContactMessage contact)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return View("Email", emailModel); // Redisplay the form if validation fails
+                contact.SubmittedAt = DateTime.Now;
+                _messages.Add(contact);
+                TempData["Message"] = "Your message has been submitted successfully!";
             }
-
-            // Set up email client
-            try
+            else
             {
-                var smtpClient = new SmtpClient("smtp.gmail.com")
-                {
-                    Port = 587,
-                    Credentials = new NetworkCredential("jtran1412@gmail.com", "Purple989#"),
-                    EnableSsl = true,
-                };
-
-                var mailMessage = new MailMessage
-                {
-                    From = new MailAddress("yourEmail@gmail.com"),
-                    Subject = "Message from " + emailModel.Name,
-                    Body = $"From: {emailModel.Name} ({emailModel.Email})\n\nMessage:\n{emailModel.Message}",
-                    IsBodyHtml = false,
-                };
-
-                // Send email to your email address
-                mailMessage.To.Add("jtran1412@gmail.com");
-
-                smtpClient.Send(mailMessage);
-
-                ViewBag.Message = "Your message has been sent successfully!";
+                TempData["Message"] = "There was an error submitting your message. Please check the inputs.";
             }
-            catch
-            {
-                ViewBag.Message = "There was an error sending your message. Please try again later.";
-            }
+            return RedirectToAction("Contact"); // Redirect to the Contact page after submission
+        }
 
-            return View("Email", emailModel); // Return the view with feedback
+        // View all submitted messages
+        public IActionResult ViewMessages()
+        {
+            return View(_messages);
         }
     }
 }

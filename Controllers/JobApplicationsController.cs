@@ -19,7 +19,12 @@ namespace JobTracker.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<JobApplication>>> GetAll()
         {
-            return await _context.JobApplications.ToListAsync();
+            var jobs = await _context.JobApplications.ToListAsync();
+            if (jobs == null)
+            {
+                return NotFound();  // Ensure that it correctly returns a 404 if no data is found
+            }
+            return Ok(jobs);  // Returns job data as JSON
         }
 
         // GET: api/JobApplications/5

@@ -1,6 +1,7 @@
 // src/App.tsx
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import ContactForm from './ContactForm'; // import ContactForm component
 
 export interface Job {
   id?: number;
@@ -69,15 +70,16 @@ const App: React.FC = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const RedirectToMVCEmail: React.FC = () => {
-    window.location.href = 'https://localhost:5195/MVC/Email';
-    return null;
-  };
-
   return (
     <Router>
       <div style={{ padding: '1rem' }}>
         <h1>Job Tracker</h1>
+        <nav>
+          <button onClick={() => window.location.href = '/contact'}>
+            Submit a Contact Message
+          </button>
+        </nav>
+
         <Routes>
           <Route path="/" element={<Navigate to="/jobs" />} />
           <Route path="/jobs" element={
@@ -110,9 +112,8 @@ const App: React.FC = () => {
               )}
             </>
           } />
-          <Route path="/email" element={<RedirectToMVCEmail />} />
+          <Route path="/contact" element={<ContactForm />} /> {/* Add ContactForm route */}
           <Route path="/aboutme" element={<p>About Me Page</p>} />
-          <Route path="/contact" element={<p>Contact Page</p>} />
           <Route path="/privacy" element={<p>Privacy Page</p>} />
         </Routes>
       </div>
