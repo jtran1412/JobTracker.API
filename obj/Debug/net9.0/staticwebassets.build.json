@@ -1,20 +1,12 @@
 {
   "Version": 1,
-  "Hash": "sjuD9dGpqLMaKQ2a+st3j7s/JFUD5o5j6/Y6pk3wbwY=",
+  "Hash": "APZLDANgubHjbUq+iSWKKGyynA8vVb5Z49gUkOuV8oI=",
   "Source": "JobTracker.API",
   "BasePath": "_content/JobTracker.API",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [
-    {
-      "Name": "JobTracker.API\\wwwroot",
-      "Source": "JobTracker.API",
-      "ContentRoot": "c:\\Users\\JustinT\\project\\v2\\wwwroot\\",
-      "BasePath": "_content/JobTracker.API",
-      "Pattern": "**"
-    }
-  ],
+  "DiscoveryPatterns": [],
   "Assets": [],
   "Endpoints": []
 }

@@ -1,6 +1,6 @@
 // src/components/JobForm.tsx
 import React, { useState } from 'react';
-import { Job } from '../App';
+import { Job } from '../types/Job';
 
 interface JobFormProps {
   onJobAdded: (job: Omit<Job, 'id'>) => void;
