@@ -1,15 +1,23 @@
 // src/components/JobForm.tsx
 import React, { useState } from 'react';
-import { Job } from '../types/Job';
+import { Job, JobStatus } from '../types/Job';
 
 interface JobFormProps {
   onJobAdded: (job: Omit<Job, 'id'>) => void;
 }
 
+const statusOptions: JobStatus[] = [
+  'applied',
+  'got interview',
+  'interviewed',
+  'rejected',
+  'got offer',
+];
+
 const JobForm: React.FC<JobFormProps> = ({ onJobAdded }) => {
   const [companyName, setCompanyName] = useState('');
   const [jobTitle, setJobTitle] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState<JobStatus>('applied');
   const [appliedDate, setAppliedDate] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -29,7 +37,7 @@ const JobForm: React.FC<JobFormProps> = ({ onJobAdded }) => {
     // Clear the form
     setCompanyName('');
     setJobTitle('');
-    setStatus('');
+    setStatus('applied');
     setAppliedDate('');
     setNotes('');
   };
@@ -58,12 +66,20 @@ const JobForm: React.FC<JobFormProps> = ({ onJobAdded }) => {
         </div>
         <div>
           <label>Status:</label>
-          <input
-            type="text"
+          <select
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(e) => setStatus(e.target.value as JobStatus)}
             required
-          />
+          >
+            {statusOptions.map((option) => (
+              <option key={option} value={option}>
+                {option
+                  .split(' ')
+                  .map((word) => word[0].toUpperCase() + word.slice(1))
+                  .join(' ')}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label>Applied Date:</label>

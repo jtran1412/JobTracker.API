@@ -51,10 +51,6 @@ const ContactForm: React.FC = () => {
     }
   };
 
-  const handleBackClick = () => {
-    navigate('/jobs'); // Navigate back to /jobs
-  };
-
   return (
     <div>
       <h2>Contact Us</h2>
