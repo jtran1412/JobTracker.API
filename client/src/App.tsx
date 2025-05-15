@@ -1,14 +1,28 @@
-import React, { useEffect, useState } from 'react'; 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  Link
+} from 'react-router-dom';
 import ContactForm from './ContactForm';
-import { Job } from './types/Job';
+import { Job, JobStatus } from './types/Job';
+
+const statusOptions: JobStatus[] = [
+  'applied',
+  'got interview',
+  'interviewed',
+  'rejected',
+  'got offer',
+];
 
 const App: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [form, setForm] = useState<Job>({
+  const [form, setForm] = useState<Partial<Job>>({
     companyName: '',
     jobTitle: '',
-    status: '',
+    status: 'applied',
     appliedDate: '',
     notes: ''
   });
@@ -20,23 +34,46 @@ const App: React.FC = () => {
       .catch(err => console.error('Failed to load jobs', err));
   }, []);
 
-  const addJob = async (e: React.FormEvent) => {
+  const addOrUpdateJob = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const method = form.id ? 'PUT' : 'POST';
+    const url = form.id
+      ? `/api/JobApplications/${form.id}`
+      : '/api/JobApplications';
+
     try {
-      const res = await fetch('/api/JobApplications', {
-        method: 'POST',
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       });
 
       if (!res.ok) {
-        console.error('Failed to add job');
+        console.error('Failed to save job');
         return;
       }
 
-      const newJob = await res.json();
-      setJobs(prev => [...prev, newJob]);
-      setForm({ companyName: '', jobTitle: '', status: '', appliedDate: '', notes: '' });
+      let savedJob: Job;
+
+      if (method === 'POST') {
+        savedJob = await res.json();
+      } else {
+        const getRes = await fetch(`/api/JobApplications/${form.id}`);
+        savedJob = await getRes.json();
+      }
+
+      setJobs((prev) =>
+        form.id ? prev.map((j) => (j.id === savedJob.id ? savedJob : j)) : [...prev, savedJob]
+      );
+
+      setForm({
+        companyName: '',
+        jobTitle: '',
+        status: 'applied',
+        appliedDate: '',
+        notes: ''
+      });
     } catch (err) {
       console.error(err);
     }
@@ -47,26 +84,24 @@ const App: React.FC = () => {
     setJobs(jobs.filter(j => j.id !== id));
   };
 
-  const updateJob = async (updatedJob: Job) => {
-    await fetch(`/api/JobApplications/${updatedJob.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedJob)
-    });
-    setJobs(jobs.map(j => j.id === updatedJob.id ? updatedJob : j));
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleEdit = (job: Job) => {
     setForm({
-      companyName: job.companyName,
-      jobTitle: job.jobTitle,
-      status: job.status,
-      appliedDate: job.appliedDate,
-      notes: job.notes || ''
+      ...job,
+      appliedDate: job.appliedDate.split('T')[0]
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setForm({
+      companyName: '',
+      jobTitle: '',
+      status: 'applied',
+      appliedDate: '',
+      notes: ''
     });
   };
 
@@ -77,20 +112,16 @@ const App: React.FC = () => {
 
         {/* Navigation */}
         <nav style={{ marginBottom: '1rem' }}>
-          <button onClick={() => (window.location.href = '/jobs')}>
-            Go to Job Tracker
-          </button>
-          <button onClick={() => (window.location.href = '/contact')} style={{ marginLeft: '1rem' }}>
-            Submit a Contact Message
-          </button>
+          <Link to="/jobs"><button>Go to Job Tracker</button></Link>
+          <Link to="/contact"><button style={{ marginLeft: '1rem' }}>Submit a Contact Message</button></Link>
         </nav>
 
         <Routes>
           <Route path="/" element={<Navigate to="/jobs" />} />
-          
+
           <Route path="/jobs" element={
             <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
-              {/* Job List on the Left */}
+              {/* Job List */}
               <div style={{ flex: 1, border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
                 <h2>Job List</h2>
                 {jobs.length === 0 ? (
@@ -111,16 +142,60 @@ const App: React.FC = () => {
                 )}
               </div>
 
-              {/* Form on the Right */}
+              {/* Form */}
               <div style={{ flex: 1, border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
                 <h2>{form.id ? 'Edit Job' : 'Add Job'}</h2>
-                <form onSubmit={addJob}>
-                  <input name="companyName" value={form.companyName} onChange={handleChange} placeholder="Company Name" required /><br />
-                  <input name="jobTitle" value={form.jobTitle} onChange={handleChange} placeholder="Job Title" required /><br />
-                  <input name="status" value={form.status} onChange={handleChange} placeholder="Status" required /><br />
-                  <input name="appliedDate" type="date" value={form.appliedDate} onChange={handleChange} required /><br />
-                  <textarea name="notes" value={form.notes} onChange={handleChange} placeholder="Notes" /><br />
+                <form onSubmit={addOrUpdateJob}>
+                  <input
+                    name="companyName"
+                    value={form.companyName}
+                    onChange={handleChange}
+                    placeholder="Company Name"
+                    required
+                  /><br />
+
+                  <input
+                    name="jobTitle"
+                    value={form.jobTitle}
+                    onChange={handleChange}
+                    placeholder="Job Title"
+                    required
+                  /><br />
+
+                  <select
+                    name="status"
+                    value={form.status}
+                    onChange={handleChange}
+                    required
+                  >
+                    {statusOptions.map((status) => (
+                      <option key={status} value={status}>
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                      </option>
+                    ))}
+                  </select><br />
+
+                  <input
+                    name="appliedDate"
+                    type="date"
+                    value={form.appliedDate}
+                    onChange={handleChange}
+                    required
+                  /><br />
+
+                  <textarea
+                    name="notes"
+                    value={form.notes}
+                    onChange={handleChange}
+                    placeholder="Notes"
+                  /><br />
+
                   <button type="submit">{form.id ? 'Update Job' : 'Add Job'}</button>
+                  {form.id && (
+                    <button type="button" onClick={handleCancelEdit} style={{ marginLeft: '1rem' }}>
+                      Leave Edit
+                    </button>
+                  )}
                 </form>
               </div>
             </div>
