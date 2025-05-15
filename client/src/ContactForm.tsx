@@ -101,9 +101,6 @@ const ContactForm: React.FC = () => {
         <button type="submit">Submit</button>
       </form>
 
-      <button onClick={handleBackClick} style={{ marginTop: '20px' }}>
-        Go to Jobs
-      </button>
     </div>
   );
 };

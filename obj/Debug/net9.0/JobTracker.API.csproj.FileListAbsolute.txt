@@ -521,3 +521,4 @@ c:\Users\JustinT\project\v2\bin\Debug\net9.0\JobTracker.API.runtimeconfig.json
 c:\Users\JustinT\project\v2\bin\Debug\net9.0\JobTracker.API.pdb
 c:\Users\JustinT\project\v2\obj\Debug\net9.0\JobTracker.API.genruntimeconfig.cache
 c:\Users\JustinT\project\v2\obj\Debug\net9.0\ref\JobTracker.API.dll
+C:\Users\JustinT\project\JobTracker.API\bin\Debug\net9.0\JobTracker.API.staticwebassets.runtime.json
