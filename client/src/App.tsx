@@ -1,10 +1,29 @@
+// src/App.tsx
 import React, { useEffect, useState } from 'react';
+import {
+  Box,
+  Heading,
+  Button,
+  Flex,
+  VStack,
+  Input,
+  Textarea,
+  HStack,
+  Text,
+  Select,
+} from '@chakra-ui/react';
+import {
+  createColumnHelper,
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+} from '@tanstack/react-table';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-  Link
+  Link as RouterLink,
 } from 'react-router-dom';
 import ContactForm from './ContactForm';
 import { Job, JobStatus } from './types/Job';
@@ -17,6 +36,12 @@ const statusOptions: JobStatus[] = [
   'got offer',
 ];
 
+const columnHelper = createColumnHelper<Job>();
+
+const ChakraRouterLink = RouterLink as unknown as React.ComponentType<
+  React.ComponentProps<typeof RouterLink>
+>;
+
 const App: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [form, setForm] = useState<Partial<Job>>({
@@ -24,14 +49,14 @@ const App: React.FC = () => {
     jobTitle: '',
     status: 'applied',
     appliedDate: '',
-    notes: ''
+    notes: '',
   });
 
   useEffect(() => {
     fetch('/api/JobApplications')
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(setJobs)
-      .catch(err => console.error('Failed to load jobs', err));
+      .catch((err) => console.error('Failed to load jobs', err));
   }, []);
 
   const addOrUpdateJob = async (e: React.FormEvent) => {
@@ -72,7 +97,7 @@ const App: React.FC = () => {
         jobTitle: '',
         status: 'applied',
         appliedDate: '',
-        notes: ''
+        notes: '',
       });
     } catch (err) {
       console.error(err);
@@ -81,17 +106,19 @@ const App: React.FC = () => {
 
   const deleteJob = async (id: number) => {
     await fetch(`/api/JobApplications/${id}`, { method: 'DELETE' });
-    setJobs(jobs.filter(j => j.id !== id));
+    setJobs(jobs.filter((j) => j.id !== id));
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleEdit = (job: Job) => {
     setForm({
       ...job,
-      appliedDate: job.appliedDate.split('T')[0]
+      appliedDate: job.appliedDate.split('T')[0],
     });
   };
 
@@ -101,112 +128,173 @@ const App: React.FC = () => {
       jobTitle: '',
       status: 'applied',
       appliedDate: '',
-      notes: ''
+      notes: '',
     });
   };
 
+  const columns = [
+    columnHelper.accessor('jobTitle', {
+      header: 'Job Title',
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor('companyName', {
+      header: 'Company',
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor('status', {
+      header: 'Status',
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor('appliedDate', {
+      header: 'Applied Date',
+      cell: (info) => new Date(info.getValue()).toLocaleDateString(),
+    }),
+    columnHelper.display({
+      id: 'actions',
+      header: 'Actions',
+      cell: (info) => {
+        const job = info.row.original;
+        return (
+          <HStack>
+            <Button size="sm" colorScheme="blue" onClick={() => handleEdit(job)}>
+              Edit
+            </Button>
+            <Button size="sm" colorScheme="red" onClick={() => deleteJob(job.id!)}>
+              Delete
+            </Button>
+          </HStack>
+        );
+      },
+    }),
+  ];
+
+  const table = useReactTable({
+    data: jobs,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
   return (
-    <Router>
-      <div style={{ padding: '1rem' }}>
-        <h1>Job Tracker</h1>
+      <Router>
+        <Box p={6}>
+          <Heading mb={4}>Job Tracker</Heading>
 
-        {/* Navigation */}
-        <nav style={{ marginBottom: '1rem' }}>
-          <Link to="/jobs"><button>Go to Job Tracker</button></Link>
-          <Link to="/contact"><button style={{ marginLeft: '1rem' }}>Submit a Contact Message</button></Link>
-        </nav>
+          {/* Navigation */}
+          <HStack mb={6}>
+            <Button as={ChakraRouterLink} to="/jobs" colorScheme="teal">
+              Go to Job Tracker
+            </Button>
+            <Button as={ChakraRouterLink} to="/contact" colorScheme="blue">
+              Submit a Contact Message
+            </Button>
+          </HStack>
 
-        <Routes>
-          <Route path="/" element={<Navigate to="/jobs" />} />
+          <Routes>
+            <Route path="/" element={<Navigate to="/jobs" />} />
 
-          <Route path="/jobs" element={
-            <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
-              {/* Job List */}
-              <div style={{ flex: 1, border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
-                <h2>Job List</h2>
-                {jobs.length === 0 ? (
-                  <p>No jobs yet.</p>
-                ) : (
-                  <ul>
-                    {jobs.map(job => (
-                      <li key={job.id} style={{ marginBottom: '1rem' }}>
-                        <strong>{job.jobTitle}</strong> at {job.companyName} – {job.status}
-                        <br />
-                        <small>Applied on {new Date(job.appliedDate).toLocaleDateString()}</small>
-                        {job.notes && <p>{job.notes}</p>}
-                        <button onClick={() => deleteJob(job.id!)}>Delete</button>
-                        <button onClick={() => handleEdit(job)} style={{ marginLeft: '1rem' }}>Edit</button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+            <Route
+              path="/jobs"
+              element={
+                <Flex gap={8} align="flex-start" wrap="wrap">
+                  {/* Job Table */}
+                  <Box flex={1} p={4} borderWidth="1px" borderRadius="lg" w="100%">
+                    <Heading size="md" mb={4}>
+                      Job List
+                    </Heading>
+                    {jobs.length === 0 ? (
+                      <Text>No jobs yet.</Text>
+                    ) : (
+                      <Box overflowX="auto">
+                        <table style={{ width: '100%' }}>
+                          <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                              <tr key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                  <th key={header.id} style={{ textAlign: 'left', padding: '0.5rem' }}>
+                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                  </th>
+                                ))}
+                              </tr>
+                            ))}
+                          </thead>
+                          <tbody>
+                            {table.getRowModel().rows.map((row) => (
+                              <tr key={row.id}>
+                                {row.getVisibleCells().map((cell) => (
+                                  <td key={cell.id} style={{ padding: '0.5rem' }}>
+                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </Box>
+                    )}
+                  </Box>
 
-              {/* Form */}
-              <div style={{ flex: 1, border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
-                <h2>{form.id ? 'Edit Job' : 'Add Job'}</h2>
-                <form onSubmit={addOrUpdateJob}>
-                  <input
-                    name="companyName"
-                    value={form.companyName}
-                    onChange={handleChange}
-                    placeholder="Company Name"
-                    required
-                  /><br />
+                  {/* Form */}
+                  <Box flex={1} p={4} borderWidth="1px" borderRadius="lg" minW="300px">
+                    <Heading size="md" mb={4}>
+                      {form.id ? 'Edit Job' : 'Add Job'}
+                    </Heading>
+                    <form onSubmit={addOrUpdateJob}>
+                      <VStack spacing={3} align="stretch">
+                        <Input
+                          name="companyName"
+                          value={form.companyName}
+                          onChange={handleChange}
+                          placeholder="Company Name"
+                          required
+                        />
+                        <Input
+                          name="jobTitle"
+                          value={form.jobTitle}
+                          onChange={handleChange}
+                          placeholder="Job Title"
+                          required
+                        />
+                        <Select name="status" value={form.status} onChange={handleChange} required>
+                          {statusOptions.map((status) => (
+                            <option key={status} value={status}>
+                              {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </option>
+                          ))}
+                        </Select>
+                        <Input
+                          name="appliedDate"
+                          type="date"
+                          value={form.appliedDate}
+                          onChange={handleChange}
+                          required
+                        />
+                        <Textarea
+                          name="notes"
+                          value={form.notes}
+                          onChange={handleChange}
+                          placeholder="Notes"
+                        />
+                        <HStack>
+                          <Button type="submit" colorScheme="green">
+                            {form.id ? 'Update Job' : 'Add Job'}
+                          </Button>
+                          {form.id && (
+                            <Button type="button" onClick={handleCancelEdit}>
+                              Leave Edit
+                            </Button>
+                          )}
+                        </HStack>
+                      </VStack>
+                    </form>
+                  </Box>
+                </Flex>
+              }
+            />
 
-                  <input
-                    name="jobTitle"
-                    value={form.jobTitle}
-                    onChange={handleChange}
-                    placeholder="Job Title"
-                    required
-                  /><br />
-
-                  <select
-                    name="status"
-                    value={form.status}
-                    onChange={handleChange}
-                    required
-                  >
-                    {statusOptions.map((status) => (
-                      <option key={status} value={status}>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </option>
-                    ))}
-                  </select><br />
-
-                  <input
-                    name="appliedDate"
-                    type="date"
-                    value={form.appliedDate}
-                    onChange={handleChange}
-                    required
-                  /><br />
-
-                  <textarea
-                    name="notes"
-                    value={form.notes}
-                    onChange={handleChange}
-                    placeholder="Notes"
-                  /><br />
-
-                  <button type="submit">{form.id ? 'Update Job' : 'Add Job'}</button>
-                  {form.id && (
-                    <button type="button" onClick={handleCancelEdit} style={{ marginLeft: '1rem' }}>
-                      Leave Edit
-                    </button>
-                  )}
-                </form>
-              </div>
-            </div>
-          } />
-
-          <Route path="/contact" element={<ContactForm />} />
-          <Route path="/aboutme" element={<p>About Me Page</p>} />
-          <Route path="/privacy" element={<p>Privacy Page</p>} />
-        </Routes>
-      </div>
-    </Router>
+            <Route path="/contact" element={<ContactForm />} />
+          </Routes>
+        </Box>
+      </Router>
   );
 };
 
