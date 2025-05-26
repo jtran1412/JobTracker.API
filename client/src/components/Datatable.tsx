@@ -21,7 +21,7 @@ interface DataTableProps {
 
 const columnHelper = createColumnHelper<Job>();
 
-const DataTable: React.FC<DataTableProps> = ({ jobs, onEdit, onDelete }) => {
+const Datatable: React.FC<DataTableProps> = ({ jobs, onEdit, onDelete }) => {
   const columns = React.useMemo(() => [
     columnHelper.accessor('jobTitle', {
       header: 'Job Title',
@@ -98,4 +98,4 @@ const DataTable: React.FC<DataTableProps> = ({ jobs, onEdit, onDelete }) => {
   );
 };
 
-export default DataTable;
+export default Datatable;
