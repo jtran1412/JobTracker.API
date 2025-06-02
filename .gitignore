@@ -1,5 +1,5 @@
 # ---------------------------
-# IDE and editor settings
+# IDE and Editor Settings
 # ---------------------------
 .vscode/
 *.suo
@@ -8,7 +8,7 @@
 *.sln.docstates
 
 # ---------------------------
-# Build and publish output
+# Build and Publish Output
 # ---------------------------
 bin/
 obj/
@@ -20,27 +20,36 @@ dist/
 Migrations/
 
 # ---------------------------
-# Logs and diagnostics
+# Logs and Diagnostics
 # ---------------------------
 *.log
 logs/
 
 # ---------------------------
-# Sensitive configuration files
+# Sensitive Configuration Files
 # ---------------------------
 appsettings.json
 appsettings.Development.json
 *.db
 
 # ---------------------------
-# Node.js frontend (if applicable)
+# Node.js Frontend (Vite React)
 # ---------------------------
+
+# Ignore dependencies and build cache
 client/node_modules/
 client/dist/
 client/.env
 client/.next/
 client/.turbo/
 client/.cache/
+
+# Optional: Ignore user/editor-specific frontend files
+client/.vscode/
+client/.eslintcache
+
+# Optional: Ignore TypeScript build files (if using tsc separately)
+client/*.tsbuildinfo
 
 # ---------------------------
 # OS-specific files
