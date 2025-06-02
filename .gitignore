@@ -56,3 +56,5 @@ client/*.tsbuildinfo
 # ---------------------------
 .DS_Store
 Thumbs.db
+
+.fake

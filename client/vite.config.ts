@@ -7,12 +7,12 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'https://localhost:7116', // Use HTTPS here
+        target: 'https://localhost:5001', // Use HTTPS here
         changeOrigin: true,
         secure: false, // Allow self-signed certificate
       },
       '/MVC': {
-        target: 'https://localhost:7116',
+        target: 'https://localhost:5001',
         changeOrigin: true,
         secure: false,
       },
