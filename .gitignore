@@ -1,0 +1,49 @@
+# ---------------------------
+# IDE and editor settings
+# ---------------------------
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ---------------------------
+# Build and publish output
+# ---------------------------
+bin/
+obj/
+dist/
+
+# ---------------------------
+# Entity Framework Migrations
+# ---------------------------
+Migrations/
+
+# ---------------------------
+# Logs and diagnostics
+# ---------------------------
+*.log
+logs/
+
+# ---------------------------
+# Sensitive configuration files
+# ---------------------------
+appsettings.json
+appsettings.Development.json
+*.db
+
+# ---------------------------
+# Node.js frontend (if applicable)
+# ---------------------------
+client/node_modules/
+client/dist/
+client/.env
+client/.next/
+client/.turbo/
+client/.cache/
+
+# ---------------------------
+# OS-specific files
+# ---------------------------
+.DS_Store
+Thumbs.db
